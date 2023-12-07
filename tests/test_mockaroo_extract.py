@@ -1,7 +1,8 @@
-from pathlib import Path
 import unittest
+from pathlib import Path
 
 from simple_el_tool.extracts.simple_extract import MockarooExtract
+
 
 class TestStringMethods(unittest.TestCase):
     
