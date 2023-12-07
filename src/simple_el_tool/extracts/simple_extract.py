@@ -26,7 +26,7 @@ class MockarooExtract(BaseExtract):
             "charset": "utf-8",
         })
         
-        self._storabe_bucket_name = "mockaroo_data"
+        self._bucket_name = "mockaroo_data"
         self._project_name = os.environ.get("GOOGLE_CLOUD_PROJECT_NAME")
         
         super().__init__()
@@ -38,7 +38,7 @@ class MockarooExtract(BaseExtract):
             os.remove(file_name)
             logging.info("Successfully removed file from disk")
     
-    def upload_to_bq(self, s3_location):
+    def upload_to_bq(self, s3_location, table: str = "mockaroo"):
         client = bigquery.Client()
         
         job_config = bigquery.LoadJobConfig(
@@ -58,7 +58,7 @@ class MockarooExtract(BaseExtract):
         )
         
         uri = f"gs://{s3_location}"
-        table_id = f"{self._project_name}.raw.mockaroo"
+        table_id = f"{self._project_name}.raw.{table}"
         
         dataset = bigquery.Dataset(".".join(table_id.split(".")[:-1]))
         dataset.location = "europe-north1"
@@ -76,11 +76,11 @@ class MockarooExtract(BaseExtract):
         
         load_job.result()
         
-        logging.info("Successfully uploaded data to BigQuery")
+        logging.info(f"Successfully uploaded data to BigQuery: {table_id}")
     
     def upload_json_to_s3(self, json_file):
         client = storage.Client(self._project_name)
-        bucket = client.bucket(self._storabe_bucket_name)
+        bucket = client.bucket(self._bucket_name)
         
         try:
             bucket.exists()
@@ -93,7 +93,7 @@ class MockarooExtract(BaseExtract):
         
         logging.info(f"Successfully uploaded {json_file} to the Cloud Storage")
         
-        return f"{self._storabe_bucket_name}/{json_file}"
+        return f"{self._bucket_name}/{json_file}"
         
     def extract(self, url: str = None):
         if not url:
