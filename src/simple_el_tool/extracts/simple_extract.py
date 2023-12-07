@@ -75,6 +75,8 @@ class MockarooExtract(BaseExtract):
         )
         
         load_job.result()
+        
+        logging.info("Successfully uploaded data to BigQuery")
     
     def upload_json_to_s3(self, json_file):
         client = storage.Client(self._project_name)
